@@ -430,12 +430,12 @@
     position: absolute;
     width: 4px;
     height: 36px;
-    background: linear-gradient(to bottom, var(--azul), transparent);
+    background: linear-gradient(to top, transparent, var(--azul));
     border-radius: 2px;
-    top: 50%;
-    left: 50%;
+    bottom: 50%;
+    left: calc(50% - 2px);
     transform-origin: bottom center;
-    transform: translateX(-50%) translateY(-100%) rotate(0deg);
+    transform: rotate(0deg);
     transition: transform 0.8s ease;
   }
   .flecha-punta {
@@ -1145,8 +1145,9 @@ async function obtenerViento(lat, lon) {
     document.getElementById('vientoDato').textContent = `${vel} km/h`;
     document.getElementById('vientoDir').textContent = `Viento desde el ${gradosACardinal(dir)} (${dir}°)`;
     const flecha = document.getElementById('flechaViento');
-    // La flecha apunta a donde va el viento (dir es de donde viene, sumamos 180)
-    flecha.style.transform = `translateX(-50%) translateY(-100%) rotate(${dir}deg)`;
+    // dir = de donde VIENE el viento. La flecha apunta hacia donde VA (+ 180)
+    const rotacion = (dir + 180) % 360;
+    flecha.style.transform = `rotate(${rotacion}deg)`;
 
   } catch(e) {
     document.getElementById('subViento').textContent = 'No se pudo obtener datos';

@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GRE Bomberos Paraguay</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8B0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GRE">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --rojo: #CC1F1F;
+    --rojo-oscuro: #8B0000;
+    --rojo-vivo: #FF2222;
+    --negro: #0D0D0D;
+    --gris-oscuro: #1A1A1A;
+    --gris-medio: #2C2C2C;
+    --gris-borde: #3A3A3A;
+    --texto: #F0F0F0;
+    --texto-dim: #999;
+    --amarillo: #FFD600;
+    --naranja: #FF6B00;
+    --verde: #22C55E;
+    --azul: #3B82F6;
+    --font-mono: 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--negro);
+    color: var(--texto);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--rojo-oscuro);
+    border-bottom: 3px solid var(--rojo-vivo);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-flame { font-size: 28px; line-height: 1; }
+  .header-text h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  .header-text p {
+    font-size: 11px;
+    color: #FFB3B3;
+    letter-spacing: 0.05em;
+  }
+  .header-badge {
+    margin-left: auto;
+    background: var(--rojo);
+    border: 1px solid var(--rojo-vivo);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: #FFD0D0;
+    letter-spacing: 0.05em;
+  }
+
+  /* MAIN */
+  main { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+  /* SEARCH SECTION */
+  .seccion-titulo {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--texto-dim);
+    margin-bottom: 8px;
+    padding-left: 2px;
+    border-left: 3px solid var(--rojo);
+    padding-left: 8px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .tab {
+    background: var(--gris-medio);
+    border: 1px solid var(--gris-borde);
+    border-radius: 6px;
+    padding: 8px 4px;
+    font-size: 11px;
+    color: var(--texto-dim);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    line-height: 1.3;
+  }
+  .tab.activo {
+    background: var(--rojo-oscuro);
+    border-color: var(--rojo);
+    color: var(--texto);
+    font-weight: 600;
+  }
+  .tab-icono { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  .input-grupo {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .input-campo {
+    width: 100%;
+    background: var(--gris-medio);
+    border: 2px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 16px 50px 16px 16px;
+    font-size: 22px;
+    font-family: var(--font-mono);
+    color: var(--texto);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-campo:focus { border-color: var(--rojo); }
+  .input-campo::placeholder { font-size: 16px; font-weight: 400; color: var(--texto-dim); }
+  .btn-buscar {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--rojo);
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .btn-buscar:active { background: var(--rojo-oscuro); }
+
+  /* SUGGESTIONS */
+  .sugerencias {
+    background: var(--gris-medio);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .sugerencia-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gris-borde);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    touch-action: manipulation;
+    transition: background 0.1s;
+  }
+  .sugerencia-item:last-child { border-bottom: none; }
+  .sugerencia-item:active { background: var(--rojo-oscuro); }
+  .sug-un {
+    background: var(--naranja);
+    color: #000;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    min-width: 52px;
+    text-align: center;
+  }
+  .sug-nombre { font-size: 14px; line-height: 1.3; flex: 1; }
+  .sug-guia {
+    font-size: 11px;
+    color: var(--texto-dim);
+    font-family: var(--font-mono);
+    background: var(--gris-oscuro);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--gris-borde); margin: 20px 0; }
+
+  /* STATUS CARDS */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .card {
+    background: var(--gris-medio);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-dim);
+    margin-bottom: 6px;
+  }
+  .card-valor {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    line-height: 1;
+  }
+  .card-sub {
+    font-size: 11px;
+    color: var(--texto-dim);
+    margin-top: 4px;
+  }
+  .card-gps { border-color: var(--verde); }
+  .card-gps .card-valor { color: var(--verde); font-size: 13px; }
+  .card-viento { border-color: var(--azul); }
+  .card-viento .card-valor { color: var(--azul); }
+
+  .btn-gps {
+    width: 100%;
+    background: var(--gris-medio);
+    border: 2px solid var(--verde);
+    border-radius: 10px;
+    padding: 14px;
+    color: var(--verde);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    touch-action: manipulation;
+    transition: all 0.15s;
+    margin-bottom: 10px;
+  }
+  .btn-gps:active { background: rgba(34,197,94,0.15); }
+  .btn-gps.activo { background: rgba(34,197,94,0.1); }
+
+  /* RESULTADO PRINCIPAL */
+  .resultado { display: none; }
+
+  .placa-un {
+    background: var(--naranja);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .placa-numero {
+    font-family: var(--font-mono);
+    font-size: 36px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1;
+  }
+  .placa-info { flex: 1; }
+  .placa-nombre {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .placa-clase {
+    font-size: 12px;
+    color: #333;
+    font-family: var(--font-mono);
+  }
+  .placa-guia-badge {
+    background: #000;
+    color: var(--naranja);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .placa-guia-badge small { display: block; font-size: 9px; color: #888; }
+
+  /* ALERTA NIVEL */
+  .nivel-alerta {
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .nivel-alerta.alto { background: rgba(204,31,31,0.25); border: 2px solid var(--rojo); color: #FF8080; }
+  .nivel-alerta.medio { background: rgba(255,107,0,0.2); border: 2px solid var(--naranja); color: #FFAA60; }
+  .nivel-alerta.bajo { background: rgba(34,197,94,0.15); border: 2px solid var(--verde); color: #86efac; }
+
+  /* SECCIONES GRE */
+  .gre-seccion {
+    background: var(--gris-medio);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .gre-seccion-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  .gre-seccion-header:active { background: rgba(255,255,255,0.05); }
+  .gre-icono { font-size: 22px; }
+  .gre-titulo { font-size: 14px; font-weight: 600; flex: 1; }
+  .gre-chevron { color: var(--texto-dim); transition: transform 0.2s; }
+  .gre-seccion.abierta .gre-chevron { transform: rotate(180deg); }
+  .gre-cuerpo {
+    padding: 0 16px 16px;
+    display: none;
+    border-top: 1px solid var(--gris-borde);
+    padding-top: 14px;
+  }
+  .gre-seccion.abierta .gre-cuerpo { display: block; }
+
+  .gre-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .gre-item:last-child { margin-bottom: 0; }
+  .gre-item-punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rojo);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .gre-item-punto.verde { background: var(--verde); }
+  .gre-item-punto.amarillo { background: var(--amarillo); }
+  .gre-item-punto.azul { background: var(--azul); }
+
+  /* DISTANCIAS */
+  .tabla-distancias {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .tabla-distancias th {
+    background: var(--gris-oscuro);
+    padding: 8px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--texto-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .tabla-distancias td {
+    padding: 8px;
+    border-bottom: 1px solid var(--gris-borde);
+    font-family: var(--font-mono);
+  }
+  .dist-val { font-weight: 700; color: var(--amarillo); }
+
+  /* VIENTO VISUAL */
+  .viento-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 8px;
+  }
+  .brujula {
+    position: relative;
+    width: 100px;
+    height: 100px;
+  }
+  .brujula-circulo {
+    width: 100px;
+    height: 100px;
+    border: 2px solid var(--gris-borde);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: var(--gris-oscuro);
+  }
+  .brujula-n, .brujula-s, .brujula-e, .brujula-o {
+    position: absolute;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--texto-dim);
+    font-family: var(--font-mono);
+  }
+  .brujula-n { top: 4px; left: 50%; transform: translateX(-50%); }
+  .brujula-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
+  .brujula-e { right: 4px; top: 50%; transform: translateY(-50%); }
+  .brujula-o { left: 4px; top: 50%; transform: translateY(-50%); }
+  .flecha-viento {
+    position: absolute;
+    width: 4px;
+    height: 36px;
+    background: linear-gradient(to bottom, var(--azul), transparent);
+    border-radius: 2px;
+    top: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+    transform: translateX(-50%) translateY(-100%) rotate(0deg);
+    transition: transform 0.8s ease;
+  }
+  .flecha-punta {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 10px solid var(--azul);
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .viento-dato {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--azul);
+  }
+  .viento-dir { font-size: 13px; color: var(--texto-dim); }
+
+  /* ZONA PELIGRO */
+  .zona-peligro {
+    background: rgba(255,214,0,0.1);
+    border: 2px solid var(--amarillo);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 8px;
+  }
+  .zona-titulo {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--amarillo);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .zona-texto { font-size: 13px; line-height: 1.6; }
+
+  /* LOADING */
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .estado-texto {
+    font-size: 13px;
+    color: var(--texto-dim);
+    text-align: center;
+    padding: 8px;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px 16px;
+    font-size: 11px;
+    color: var(--texto-dim);
+    border-top: 1px solid var(--gris-borde);
+    margin-top: 24px;
+  }
+  footer strong { color: var(--rojo); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-flame">🔥</div>
+  <div class="header-text">
+    <h1>GRE Bomberos</h1>
+    <p>Guía de Respuesta a Emergencias</p>
+  </div>
+  <div class="header-badge">GRE 2024</div>
+</header>
+
+<main>
+
+  <!-- BÚSQUEDA -->
+  <div style="margin-bottom:20px">
+    <p class="seccion-titulo">Identificar material</p>
+    <div class="tabs">
+      <div class="tab activo" data-tipo="un" onclick="cambiarTipo('un')">
+        <span class="tab-icono">🟧</span>N° UN
+      </div>
+      <div class="tab" data-tipo="nombre" onclick="cambiarTipo('nombre')">
+        <span class="tab-icono">🔤</span>Nombre
+      </div>
+      <div class="tab" data-tipo="guia" onclick="cambiarTipo('guia')">
+        <span class="tab-icono">📋</span>Guía
+      </div>
+      <div class="tab" data-tipo="clase" onclick="cambiarTipo('clase')">
+        <span class="tab-icono">⚠️</span>Clase
+      </div>
+    </div>
+    <div class="input-grupo">
+      <input class="input-campo" id="campoBusqueda" type="text" placeholder="Ingresá el N° UN..." autocomplete="off" autocorrect="off" spellcheck="false" oninput="buscar()" onkeydown="teclaEnter(event)">
+      <button class="btn-buscar" onclick="ejecutarBusqueda()">🔍</button>
+    </div>
+    <div class="sugerencias" id="sugerencias"></div>
+  </div>
+
+  <!-- GPS Y VIENTO -->
+  <div style="margin-bottom:20px">
+    <p class="seccion-titulo">Situación en campo</p>
+    <button class="btn-gps" id="btnGPS" onclick="obtenerGPS()">
+      <span id="gpsIcono">📍</span>
+      <span id="gpsTexto">Obtener ubicación GPS</span>
+    </button>
+    <div class="cards-grid">
+      <div class="card card-gps">
+        <div class="card-label">Ubicación</div>
+        <div class="card-valor" id="valorGPS">—</div>
+        <div class="card-sub" id="subGPS">Sin datos</div>
+      </div>
+      <div class="card card-viento">
+        <div class="card-label">Viento</div>
+        <div class="card-valor" id="valorViento">—</div>
+        <div class="card-sub" id="subViento">Sin datos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADO GRE -->
+  <div class="resultado" id="resultado">
+    <div class="divider"></div>
+    <p class="seccion-titulo">Ficha de respuesta</p>
+
+    <div class="placa-un" id="placaUN">
+      <div>
+        <div class="placa-numero" id="placaNumero">1203</div>
+        <div style="font-size:10px;color:#555;font-family:var(--font-mono)">N° UN</div>
+      </div>
+      <div class="placa-info">
+        <div class="placa-nombre" id="placaNombre">GASOLINA</div>
+        <div class="placa-clase" id="placaClase">Clase 3 · Líquido inflamable</div>
+      </div>
+      <div class="placa-guia-badge">
+        <small>GUÍA</small>
+        <span id="placaGuia">128</span>
+      </div>
+    </div>
+
+    <div class="nivel-alerta alto" id="nivelAlerta">
+      <span style="font-size:20px">🔴</span>
+      <span id="textoAlerta">Peligro ALTO — Mantenerse a distancia</span>
+    </div>
+
+    <!-- VIENTO Y ZONA -->
+    <div class="gre-seccion abierta" id="seccionViento">
+      <div class="gre-seccion-header" onclick="toggleSeccion(this)">
+        <span class="gre-icono">💨</span>
+        <span class="gre-titulo">Dirección del viento y zona de peligro</span>
+        <span class="gre-chevron">▼</span>
+      </div>
+      <div class="gre-cuerpo">
+        <div class="viento-visual">
+          <div class="brujula">
+            <div class="brujula-circulo">
+              <span class="brujula-n">N</span>
+              <span class="brujula-s">S</span>
+              <span class="brujula-e">E</span>
+              <span class="brujula-o">O</span>
+              <div class="flecha-viento" id="flechaViento">
+                <div class="flecha-punta"></div>
+              </div>
+            </div>
+          </div>
+          <div class="viento-dato" id="vientoDato">— km/h</div>
+          <div class="viento-dir" id="vientoDir">Dirección del viento</div>
+        </div>
+        <div class="zona-peligro" id="zonaPeligro">
+          <div class="zona-titulo">⚠️ Zona de peligro estimada</div>
+          <div class="zona-texto" id="zonaTexto">Obtené tu ubicación GPS para calcular la zona de peligro según la dirección del viento.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AISLAMIENTO -->
+    <div class="gre-seccion abierta">
+      <div class="gre-seccion-header" onclick="toggleSeccion(this)">
+        <span class="gre-icono">🚧</span>
+        <span class="gre-titulo">Distancias de aislamiento</span>
+        <span class="gre-chevron">▼</span>
+      </div>
+      <div class="gre-cuerpo">
+        <table class="tabla-distancias" id="tablaDistancias">
+          <thead>
+            <tr>
+              <th>Situación</th>
+              <th>Derrame chico</th>
+              <th>Derrame grande</th>
+            </tr>
+          </thead>
+          <tbody id="filasDistancias"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ACCIONES INMEDIATAS -->
+    <div class="gre-seccion abierta">
+      <div class="gre-seccion-header" onclick="toggleSeccion(this)">
+        <span class="gre-icono">⚡</span>
+        <span class="gre-titulo">Acciones inmediatas</span>
+        <span class="gre-chevron">▼</span>
+      </div>
+      <div class="gre-cuerpo" id="accionesInmediatas"></div>
+    </div>
+
+    <!-- PROTECCIÓN -->
+    <div class="gre-seccion">
+      <div class="gre-seccion-header" onclick="toggleSeccion(this)">
+        <span class="gre-icono">🧰</span>
+        <span class="gre-titulo">Equipo de protección</span>
+        <span class="gre-chevron">▼</span>
+      </div>
+      <div class="gre-cuerpo" id="equipoProteccion"></div>
+    </div>
+
+    <!-- INCENDIO -->
+    <div class="gre-seccion">
+      <div class="gre-seccion-header" onclick="toggleSeccion(this)">
+        <span class="gre-icono">🔥</span>
+        <span class="gre-titulo">Respuesta ante incendio</span>
+        <span class="gre-chevron">▼</span>
+      </div>
+      <div class="gre-cuerpo" id="respuestaIncendio"></div>
+    </div>
+
+    <!-- PRIMEROS AUXILIOS -->
+    <div class="gre-seccion">
+      <div class="gre-seccion-header" onclick="toggleSeccion(this)">
+        <span class="gre-icono">🏥</span>
+        <span class="gre-titulo">Primeros auxilios</span>
+        <span class="gre-chevron">▼</span>
+      </div>
+      <div class="gre-cuerpo" id="primerosAuxilios"></div>
+    </div>
+
+  </div><!-- fin resultado -->
+
+</main>
+
+<footer>
+  <strong>GRE Bomberos Paraguay</strong> · Basado en GRE 2024<br>
+  Uso exclusivo como referencia de campo. Siempre consultá a CIQUIME/CETOX.
+</footer>
+
+<script>
+// =============================
+// BASE DE DATOS GRE (muestra representativa)
+// =============================
+const BD_GRE = [
+  {
+    un: "1203", nombre: "GASOLINA", clase: "3", division: "Líquido inflamable",
+    guia: 128, riesgo: "alto",
+    sinonimos: ["gasolina", "nafta", "combustible", "petrol", "bencina"],
+    alertaMensaje: "Líquido altamente inflamable — vapores más pesados que el aire",
+    distancias: [
+      { sit: "Derrame / Fuga", chico: "30 m", grande: "100 m" },
+      { sit: "Con fuego", chico: "300 m", grande: "800 m" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "Aislar inmediatamente 50 metros en todas las direcciones." },
+      { color: "rojo", texto: "Eliminar toda fuente de ignición: no encender nada, sin celulares cerca de la zona." },
+      { color: "amarillo", texto: "Detener la fuga si se puede hacer sin riesgo." },
+      { color: "amarillo", texto: "Prevenir entrada de producto a alcantarillas o cursos de agua." },
+      { color: "verde", texto: "Ventilar áreas cerradas antes de ingresar." }
+    ],
+    equipo: [
+      { color: "rojo", texto: "Equipo de protección respiratoria autónomo (EPRA) obligatorio si hay vapores." },
+      { color: "amarillo", texto: "Traje resistente al fuego (nivel mínimo B estructural)." },
+      { color: "verde", texto: "Guantes de goma o neopreno." }
+    ],
+    incendio: [
+      { color: "rojo", texto: "Tanque o vagón con fuego: evacuar 800 metros y dejar arder controladamente." },
+      { color: "rojo", texto: "Riesgo de BLEVE si el fuego alcanza depósitos." },
+      { color: "amarillo", texto: "Usar agua en nebulización para enfriar contenedores expuestos." },
+      { color: "verde", texto: "Pequeños incendios: polvo seco, CO₂ o espuma AFFF." }
+    ],
+    auxilios: [
+      { color: "rojo", texto: "Inhalación: sacar a aire fresco, si no respira dar RCP, buscar atención médica urgente." },
+      { color: "amarillo", texto: "Piel: lavar con agua y jabón abundante al menos 20 minutos." },
+      { color: "verde", texto: "Ojos: enjuagar con agua limpia durante 20 minutos mínimo." }
+    ]
+  },
+  {
+    un: "1017", nombre: "CLORO", clase: "2.3", division: "Gas tóxico",
+    guia: 124, riesgo: "alto",
+    sinonimos: ["cloro", "chlorine", "gas cloro"],
+    alertaMensaje: "Gas TÓXICO — Peligro de muerte por inhalación",
+    distancias: [
+      { sit: "Derrame pequeño (día)", chico: "200 m", grande: "—" },
+      { sit: "Derrame pequeño (noche)", chico: "400 m", grande: "—" },
+      { sit: "Derrame grande (día)", chico: "—", grande: "1.1 km" },
+      { sit: "Derrame grande (noche)", chico: "—", grande: "3.8 km" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "Aislar inmediatamente 200-400 m según condiciones." },
+      { color: "rojo", texto: "Evacuar a sotavento (en la dirección contraria al viento) al menos 1 km." },
+      { color: "amarillo", texto: "No intentar detener la fuga sin equipo autónomo completo." },
+      { color: "verde", texto: "Informar a CETOX Paraguay: +595 21 290 123." }
+    ],
+    equipo: [
+      { color: "rojo", texto: "EPRA obligatorio — máscaras con filtro NO son suficientes." },
+      { color: "rojo", texto: "Traje hermetico / encapsulado Nivel A." },
+      { color: "amarillo", texto: "Botas y guantes resistentes a sustancias químicas." }
+    ],
+    incendio: [
+      { color: "rojo", texto: "El cloro no arde pero intensifica el fuego de otros materiales." },
+      { color: "amarillo", texto: "Enfriar contenedores con agua desde distancia segura." },
+      { color: "verde", texto: "No usar agua directamente sobre el cloro líquido." }
+    ],
+    auxilios: [
+      { color: "rojo", texto: "Inhalación: sacar de zona contaminada inmediatamente, requerir atención médica de urgencia." },
+      { color: "amarillo", texto: "Piel: quitar ropa contaminada, lavar con agua 20 minutos." },
+      { color: "amarillo", texto: "Ojos: lavar con agua limpia 20 minutos, no frotar." }
+    ]
+  },
+  {
+    un: "1075", nombre: "GAS LICUADO DE PETRÓLEO (GLP)", clase: "2.1", division: "Gas inflamable",
+    guia: 115, riesgo: "alto",
+    sinonimos: ["glp", "gas licuado", "propano", "butano", "gas de cocina"],
+    alertaMensaje: "Gas inflamable bajo presión — Alto riesgo de explosión",
+    distancias: [
+      { sit: "Derrame / Fuga", chico: "30 m", grande: "150 m" },
+      { sit: "Con fuego", chico: "300 m", grande: "1000 m" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "Aislar 100 metros en todas las direcciones. Si hay fuego, 300 m." },
+      { color: "rojo", texto: "Eliminar toda fuente de ignición." },
+      { color: "amarillo", texto: "Cerrar la válvula de gas si es seguro hacerlo." },
+      { color: "verde", texto: "Enfriar cilindro con agua desde distancia segura." }
+    ],
+    equipo: [
+      { color: "rojo", texto: "EPRA si hay concentraciones elevadas de gas." },
+      { color: "amarillo", texto: "Traje ignífugo estructural de bombero." }
+    ],
+    incendio: [
+      { color: "rojo", texto: "RIESGO SEVERO DE BLEVE — si el fuego contacta el cilindro, evacuar 800 m mínimo." },
+      { color: "amarillo", texto: "Enfriar el cilindro con agua nebulizada desde distancia segura." },
+      { color: "verde", texto: "Si la fuga arde sin explotar, NO apagar el fuego, enfriar y esperar que se consuma." }
+    ],
+    auxilios: [
+      { color: "rojo", texto: "Congelamiento de piel por contacto con GLP líquido: no frotar, calentar suavemente con agua tibia." },
+      { color: "amarillo", texto: "Inhalación en espacio confinado: aire fresco, RCP si no respira." }
+    ]
+  },
+  {
+    un: "1170", nombre: "ETANOL / ALCOHOL ETÍLICO", clase: "3", division: "Líquido inflamable",
+    guia: 127, riesgo: "medio",
+    sinonimos: ["etanol", "alcohol etilico", "alcohol", "ethanol"],
+    alertaMensaje: "Líquido inflamable — Llama casi invisible",
+    distancias: [
+      { sit: "Derrame / Fuga", chico: "20 m", grande: "60 m" },
+      { sit: "Con fuego", chico: "200 m", grande: "500 m" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "Aislar 50 metros en todas las direcciones." },
+      { color: "amarillo", texto: "Eliminar fuentes de ignición." },
+      { color: "verde", texto: "Detener la fuga si es posible sin riesgo." }
+    ],
+    equipo: [
+      { color: "amarillo", texto: "Equipo de protección respiratoria según concentración." },
+      { color: "verde", texto: "Guantes de goma o neopreno, traje ignífugo." }
+    ],
+    incendio: [
+      { color: "amarillo", texto: "La llama del etanol puede ser invisible — usar detector de calor." },
+      { color: "verde", texto: "Espuma resistente al alcohol (ATC-AFFF), CO₂ o polvo químico." }
+    ],
+    auxilios: [
+      { color: "amarillo", texto: "Inhalación: aire fresco, atención médica si hay síntomas." },
+      { color: "verde", texto: "Piel/ojos: lavar con agua abundante 15-20 minutos." }
+    ]
+  },
+  {
+    un: "2794", nombre: "BATERÍAS DE PLOMO HÚMEDAS", clase: "8", division: "Corrosivo",
+    guia: 154, riesgo: "bajo",
+    sinonimos: ["baterias", "acumuladores", "batería plomo", "acid battery"],
+    alertaMensaje: "Corrosivo — Ácido sulfúrico, precaución de quemaduras",
+    distancias: [
+      { sit: "Derrame ácido", chico: "10 m", grande: "30 m" }
+    ],
+    acciones: [
+      { color: "amarillo", texto: "Aislar el área afectada por derrame ácido." },
+      { color: "verde", texto: "Neutralizar con bicarbonato de sodio si se dispone." },
+      { color: "verde", texto: "Prevenir entrada a cursos de agua." }
+    ],
+    equipo: [
+      { color: "amarillo", texto: "Guantes de goma gruesos, delantal de PVC." },
+      { color: "verde", texto: "Lentes de protección química." }
+    ],
+    incendio: [
+      { color: "amarillo", texto: "Puede liberar hidrógeno — mantener ventilación." },
+      { color: "verde", texto: "Agua o polvo seco para el fuego." }
+    ],
+    auxilios: [
+      { color: "rojo", texto: "Contacto con ácido: lavar con agua abundante 20 minutos, atención médica urgente." }
+    ]
+  },
+  {
+    un: "1090", nombre: "ACETONA", clase: "3", division: "Líquido inflamable",
+    guia: 127, riesgo: "medio",
+    sinonimos: ["acetona", "dimetilcetona", "propanona"],
+    alertaMensaje: "Líquido inflamable — Vapores pesados, riesgo de explosión en espacios cerrados",
+    distancias: [
+      { sit: "Derrame / Fuga", chico: "20 m", grande: "80 m" },
+      { sit: "Con fuego", chico: "200 m", grande: "500 m" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "Aislar 50 metros, eliminar fuentes de ignición." },
+      { color: "amarillo", texto: "Ventilar espacios cerrados antes de ingresar." },
+      { color: "verde", texto: "Detener fuga si es posible sin riesgo." }
+    ],
+    equipo: [
+      { color: "amarillo", texto: "Protección respiratoria si hay vapores concentrados." },
+      { color: "verde", texto: "Guantes de neopreno, ropa ignífuga." }
+    ],
+    incendio: [
+      { color: "verde", texto: "CO₂, polvo seco, espuma. Enfriar contenedores con agua." }
+    ],
+    auxilios: [
+      { color: "amarillo", texto: "Inhalación: aire fresco, médico si hay síntomas." },
+      { color: "verde", texto: "Piel/ojos: lavar con agua 15-20 minutos." }
+    ]
+  },
+  {
+    un: "2448", nombre: "AZUFRE FUNDIDO", clase: "4.1", division: "Sólido inflamable",
+    guia: 133, riesgo: "medio",
+    sinonimos: ["azufre", "sulfur", "azufre fundido"],
+    alertaMensaje: "Sólido inflamable — Al arder genera SO₂ (dióxido de azufre) tóxico",
+    distancias: [
+      { sit: "Derrame / Fuga", chico: "25 m", grande: "100 m" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "Si arde: alejarse de los humos, son tóxicos (SO₂)." },
+      { color: "amarillo", texto: "Aislar 100 metros si hay humo." },
+      { color: "verde", texto: "No usar agua sobre azufre fundido (explosión de vapor)." }
+    ],
+    equipo: [
+      { color: "rojo", texto: "EPRA si hay humo o vapores." },
+      { color: "amarillo", texto: "Traje resistente al calor." }
+    ],
+    incendio: [
+      { color: "rojo", texto: "No usar agua sobre azufre fundido: puede causar explosiones de vapor." },
+      { color: "verde", texto: "Dejar consumir de forma controlada si no hay riesgo de propagación." }
+    ],
+    auxilios: [
+      { color: "rojo", texto: "Inhalación de SO₂: sacar a aire fresco, oxígeno si está disponible, médico urgente." },
+      { color: "amarillo", texto: "Quemaduras térmicas: enfriar con agua fría." }
+    ]
+  },
+  {
+    un: "1830", nombre: "ÁCIDO SULFÚRICO", clase: "8", division: "Corrosivo",
+    guia: 137, riesgo: "alto",
+    sinonimos: ["acido sulfurico", "sulfuric acid", "vitriol"],
+    alertaMensaje: "Corrosivo SEVERO — Quemaduras graves, reacciona violentamente con agua",
+    distancias: [
+      { sit: "Derrame chico", chico: "30 m", grande: "—" },
+      { sit: "Derrame grande", chico: "—", grande: "150 m" }
+    ],
+    acciones: [
+      { color: "rojo", texto: "No agregar agua al ácido concentrado — puede causar salpicaduras violentas." },
+      { color: "rojo", texto: "Aislar 50 metros del derrame." },
+      { color: "amarillo", texto: "Neutralizar con cal o bicarbonato desde distancia segura." },
+      { color: "verde", texto: "Prevenir entrada a cursos de agua." }
+    ],
+    equipo: [
+      { color: "rojo", texto: "Traje encapsulado nivel B o A para derrames significativos." },
+      { color: "rojo", texto: "EPRA — vapores de SO₂ son tóxicos." },
+      { color: "amarillo", texto: "Guantes de goma gruesos, lentes de protección." }
+    ],
+    incendio: [
+      { color: "amarillo", texto: "No arde, pero reacciona con metales generando hidrógeno inflamable." },
+      { color: "verde", texto: "Agua nebulizada para controlar vapores." }
+    ],
+    auxilios: [
+      { color: "rojo", texto: "Contacto piel: quitar ropa, lavar con MUCHA agua al menos 20 minutos, urgencia médica." },
+      { color: "rojo", texto: "Ojos: lavar con agua 20 minutos continuos, oftalmólogo urgente." },
+      { color: "amarillo", texto: "Ingestión: NO inducir vómito, agua o leche, médico urgente." }
+    ]
+  }
+];
+
+// Clases de peligro
+const CLASES_PELIGRO = {
+  "1": "Explosivos",
+  "2.1": "Gases inflamables",
+  "2.2": "Gases no inflamables",
+  "2.3": "Gases tóxicos",
+  "3": "Líquidos inflamables",
+  "4.1": "Sólidos inflamables",
+  "4.2": "Espontáneamente inflamables",
+  "4.3": "Reaccionan con agua",
+  "5.1": "Oxidantes",
+  "5.2": "Peróxidos orgánicos",
+  "6.1": "Tóxicos",
+  "6.2": "Infecciosos",
+  "7": "Radioactivos",
+  "8": "Corrosivos",
+  "9": "Misceláneos"
+};
+
+// Estado
+let tipoActual = "un";
+let posicion = null;
+let datoViento = null;
+let materialActual = null;
+
+function cambiarTipo(tipo) {
+  tipoActual = tipo;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+  document.querySelector(`[data-tipo="${tipo}"]`).classList.add('activo');
+  const campo = document.getElementById('campoBusqueda');
+  const placeholders = {
+    un: "Ingresá el N° UN... ej: 1203",
+    nombre: "Nombre del producto... ej: gasolina",
+    guia: "N° de guía GRE... ej: 128",
+    clase: "Clase... ej: 3 o 2.3"
+  };
+  campo.placeholder = placeholders[tipo];
+  campo.value = '';
+  ocultarSugerencias();
+}
+
+function buscar() {
+  const q = document.getElementById('campoBusqueda').value.trim().toLowerCase();
+  if (q.length < 1) { ocultarSugerencias(); return; }
+
+  let resultados = [];
+
+  if (tipoActual === 'un') {
+    resultados = BD_GRE.filter(m => m.un.startsWith(q));
+  } else if (tipoActual === 'nombre') {
+    resultados = BD_GRE.filter(m =>
+      m.nombre.toLowerCase().includes(q) ||
+      m.sinonimos.some(s => s.includes(q))
+    );
+  } else if (tipoActual === 'guia') {
+    resultados = BD_GRE.filter(m => String(m.guia).startsWith(q));
+  } else if (tipoActual === 'clase') {
+    resultados = BD_GRE.filter(m => m.clase.startsWith(q));
+  }
+
+  mostrarSugerencias(resultados.slice(0, 5));
+}
+
+function mostrarSugerencias(lista) {
+  const div = document.getElementById('sugerencias');
+  if (!lista.length) { ocultarSugerencias(); return; }
+  div.style.display = 'block';
+  div.innerHTML = lista.map(m => `
+    <div class="sugerencia-item" onclick="seleccionarMaterial('${m.un}')">
+      <span class="sug-un">UN ${m.un}</span>
+      <span class="sug-nombre">${m.nombre}</span>
+      <span class="sug-guia">G${m.guia}</span>
+    </div>
+  `).join('');
+}
+
+function ocultarSugerencias() {
+  document.getElementById('sugerencias').style.display = 'none';
+}
+
+function teclaEnter(e) {
+  if (e.key === 'Enter') ejecutarBusqueda();
+}
+
+function ejecutarBusqueda() {
+  const q = document.getElementById('campoBusqueda').value.trim();
+  let material = null;
+  if (tipoActual === 'un') material = BD_GRE.find(m => m.un === q);
+  if (!material) {
+    const ql = q.toLowerCase();
+    material = BD_GRE.find(m =>
+      m.nombre.toLowerCase().includes(ql) ||
+      m.sinonimos.some(s => s.includes(ql)) ||
+      String(m.guia) === q
+    );
+  }
+  if (material) seleccionarMaterial(material.un);
+}
+
+function seleccionarMaterial(un) {
+  const m = BD_GRE.find(x => x.un === un);
+  if (!m) return;
+  materialActual = m;
+  ocultarSugerencias();
+  document.getElementById('campoBusqueda').value = `${m.un} — ${m.nombre}`;
+  mostrarResultado(m);
+  actualizarZonaPeligro();
+  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function mostrarResultado(m) {
+  document.getElementById('placaNumero').textContent = m.un;
+  document.getElementById('placaNombre').textContent = m.nombre;
+  document.getElementById('placaClase').textContent = `Clase ${m.clase} · ${m.division}`;
+  document.getElementById('placaGuia').textContent = m.guia;
+
+  // Color placa según clase
+  const placa = document.getElementById('placaUN');
+  const coloresFondo = { "2.3": "#CC1F1F", "6.1": "#CC1F1F", "8": "#6B21A8", "3": "#FF6B00", "2.1": "#FF6B00", "4.1": "#FF6B00", "1": "#FF6B00" };
+  placa.style.background = coloresFondo[m.clase] || '#FF6B00';
+
+  // Nivel alerta
+  const alerta = document.getElementById('nivelAlerta');
+  const textoAlerta = document.getElementById('textoAlerta');
+  alerta.className = `nivel-alerta ${m.riesgo}`;
+  const iconos = { alto: '🔴', medio: '🟡', bajo: '🟢' };
+  alerta.innerHTML = `<span style="font-size:20px">${iconos[m.riesgo]}</span><span>${m.alertaMensaje}</span>`;
+
+  // Distancias
+  const filas = document.getElementById('filasDistancias');
+  filas.innerHTML = m.distancias.map(d =>
+    `<tr><td>${d.sit}</td><td class="dist-val">${d.chico}</td><td class="dist-val">${d.grande}</td></tr>`
+  ).join('');
+
+  // Renderizar secciones
+  renderizarItems('accionesInmediatas', m.acciones);
+  renderizarItems('equipoProteccion', m.equipo);
+  renderizarItems('respuestaIncendio', m.incendio);
+  renderizarItems('primerosAuxilios', m.auxilios);
+
+  document.getElementById('resultado').style.display = 'block';
+}
+
+function renderizarItems(id, items) {
+  document.getElementById(id).innerHTML = items.map(i =>
+    `<div class="gre-item">
+      <div class="gre-item-punto ${i.color === 'verde' ? 'verde' : i.color === 'amarillo' ? 'amarillo' : ''}"></div>
+      <div>${i.texto}</div>
+    </div>`
+  ).join('');
+}
+
+function toggleSeccion(header) {
+  const sec = header.parentElement;
+  sec.classList.toggle('abierta');
+}
+
+// =============================
+// GPS
+// =============================
+async function obtenerGPS() {
+  const btn = document.getElementById('btnGPS');
+  const icono = document.getElementById('gpsIcono');
+  const texto = document.getElementById('gpsTexto');
+  icono.textContent = '';
+  icono.innerHTML = '<span class="spinner"></span>';
+  texto.textContent = 'Obteniendo ubicación...';
+  btn.disabled = true;
+
+  if (!navigator.geolocation) {
+    textoGPS('GPS no disponible en este dispositivo');
+    btn.disabled = false;
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    posicion = { lat: pos.coords.latitude, lon: pos.coords.longitude, precision: pos.coords.accuracy };
+
+    document.getElementById('valorGPS').textContent = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+    document.getElementById('subGPS').textContent = `±${Math.round(pos.coords.accuracy)}m precisión`;
+
+    icono.innerHTML = '📍';
+    texto.textContent = 'Ubicación obtenida · Actualizar';
+    btn.classList.add('activo');
+    btn.disabled = false;
+
+    await obtenerViento(pos.coords.latitude, pos.coords.longitude);
+    actualizarZonaPeligro();
+  }, (err) => {
+    icono.innerHTML = '❌';
+    texto.textContent = 'No se pudo obtener GPS · Reintentar';
+    btn.disabled = false;
+    document.getElementById('subGPS').textContent = 'Error: ' + err.message;
+  }, { enableHighAccuracy: true, timeout: 15000 });
+}
+
+// =============================
+// VIENTO — Open-Meteo (sin API key)
+// =============================
+async function obtenerViento(lat, lon) {
+  document.getElementById('valorViento').textContent = '...';
+  document.getElementById('subViento').textContent = 'Consultando API...';
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh&timezone=auto`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const vel = data.current.wind_speed_10m;
+    const dir = data.current.wind_direction_10m;
+
+    datoViento = { velocidad: vel, direccion: dir };
+
+    document.getElementById('valorViento').textContent = `${vel} km/h`;
+    document.getElementById('subViento').textContent = `Dirección: ${dir}° (${gradosACardinal(dir)})`;
+
+    // Actualizar brújula
+    document.getElementById('vientoDato').textContent = `${vel} km/h`;
+    document.getElementById('vientoDir').textContent = `Viento desde el ${gradosACardinal(dir)} (${dir}°)`;
+    const flecha = document.getElementById('flechaViento');
+    // La flecha apunta a donde va el viento (dir es de donde viene, sumamos 180)
+    flecha.style.transform = `translateX(-50%) translateY(-100%) rotate(${dir}deg)`;
+
+  } catch(e) {
+    document.getElementById('subViento').textContent = 'No se pudo obtener datos';
+  }
+}
+
+function gradosACardinal(grados) {
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+  return dirs[Math.round(grados / 22.5) % 16];
+}
+
+function actualizarZonaPeligro() {
+  if (!materialActual || !posicion || !datoViento) {
+    document.getElementById('zonaTexto').textContent = 'Obtené tu ubicación GPS para calcular la zona de peligro según el viento.';
+    return;
+  }
+  const dir = gradosACardinal(datoViento.direccion);
+  const vel = datoViento.velocidad;
+  const dist = materialActual.distancias[0];
+  const dirOpuesta = gradosACardinalOpuesto(datoViento.direccion);
+
+  let intensidad = vel < 10 ? "bajo" : vel < 30 ? "moderado" : "alto";
+  let zona = dist ? dist.grande !== '—' ? dist.grande : dist.chico : '100 m';
+
+  document.getElementById('zonaTexto').innerHTML =
+    `<strong>Viento desde el ${dir}</strong> a ${vel} km/h (intensidad ${intensidad}).<br><br>
+    La nube/vapores se desplazan hacia el <strong>${dirOpuesta}</strong>.<br><br>
+    ⚠️ Zona de peligro estimada: <strong>${zona} hacia el ${dirOpuesta}</strong> del punto de incidente.<br><br>
+    ✅ Posicionarse al <strong>${dir}</strong> del incidente (barlovento).`;
+}
+
+function gradosACardinalOpuesto(grados) {
+  return gradosACardinal((grados + 180) % 360);
+}
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(err => console.warn('SW error:', err));
+    });
+  }
+</script>
+</body>
+</html>

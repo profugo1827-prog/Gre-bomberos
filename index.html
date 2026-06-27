@@ -415,12 +415,44 @@
     position: relative;
     background: var(--gris-oscuro);
   }
+  .brujula-rosa {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transition: transform 0.15s ease-out;
+  }
+  /* Marcas cardinales giran con la rosa */
   .brujula-n, .brujula-s, .brujula-e, .brujula-o {
     position: absolute;
     font-size: 11px;
     font-weight: 700;
     color: var(--texto-dim);
     font-family: var(--font-mono);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .btn-brujula {
+    background: var(--gris-medio);
+    border: 1px solid var(--azul);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--azul);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.15s;
+  }
+  .btn-brujula:active { background: rgba(59,130,246,0.15); }
+  .btn-brujula.activa { background: rgba(59,130,246,0.1); border-color: var(--verde); color: var(--verde); }
+
+  .rumbo-texto {
+    font-size: 12px;
+    color: var(--texto-dim);
+    font-family: var(--font-mono);
+    min-height: 18px;
   }
   .brujula-n { top: 4px; left: 50%; transform: translateX(-50%); }
   .brujula-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
@@ -601,18 +633,28 @@
       <div class="gre-cuerpo">
         <div class="viento-visual">
           <div class="brujula">
-            <div class="brujula-circulo">
+            <div class="brujula-circulo" id="brujulaCirculo">
               <span class="brujula-n">N</span>
               <span class="brujula-s">S</span>
               <span class="brujula-e">E</span>
               <span class="brujula-o">O</span>
-              <div class="flecha-viento" id="flechaViento">
+              <!-- Rosa de los vientos gira con el teléfono -->
+              <div class="brujula-rosa" id="brujulaRosa">
+                <span class="brujula-n">N</span>
+                <span class="brujula-s">S</span>
+                <span class="brujula-e">E</span>
+                <span class="brujula-o">O</span>
+              </div>              <div class="flecha-viento" id="flechaViento">
                 <div class="flecha-punta"></div>
               </div>
             </div>
           </div>
+          <button class="btn-brujula" id="btnBrujula" onclick="activarBrujula()">
+            🧭 Activar brújula
+          </button>
           <div class="viento-dato" id="vientoDato">— km/h</div>
           <div class="viento-dir" id="vientoDir">Dirección del viento</div>
+          <div class="rumbo-texto" id="rumboTexto"></div>
         </div>
         <div class="zona-peligro" id="zonaPeligro">
           <div class="zona-titulo">⚠️ Zona de peligro estimada</div>
@@ -1181,6 +1223,83 @@ function actualizarZonaPeligro() {
 
 function gradosACardinalOpuesto(grados) {
   return gradosACardinal((grados + 180) % 360);
+}
+
+// =============================
+// BRÚJULA — DeviceOrientation
+// =============================
+let brujulaActiva = false;
+let rumboActual = 0;
+
+async function activarBrujula() {
+  const btn = document.getElementById('btnBrujula');
+
+  if (brujulaActiva) {
+    window.removeEventListener('deviceorientationabsolute', manejadorBrujula);
+    window.removeEventListener('deviceorientation', manejadorBrujula);
+    brujulaActiva = false;
+    btn.textContent = '🧭 Activar brújula';
+    btn.classList.remove('activa');
+    document.getElementById('rumboTexto').textContent = '';
+    return;
+  }
+
+  // iOS 13+ requiere permiso explícito
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const permiso = await DeviceOrientationEvent.requestPermission();
+      if (permiso !== 'granted') {
+        alert('Permiso de orientación denegado. Activalo en Configuración → Safari → Movimiento.');
+        return;
+      }
+    } catch(e) {
+      alert('No se pudo pedir permiso: ' + e.message);
+      return;
+    }
+  }
+
+  // Preferir deviceorientationabsolute (da norte magnético real)
+  if ('ondeviceorientationabsolute' in window) {
+    window.addEventListener('deviceorientationabsolute', manejadorBrujula, true);
+  } else {
+    window.addEventListener('deviceorientation', manejadorBrujula, true);
+  }
+
+  brujulaActiva = true;
+  btn.textContent = '🧭 Brújula activa · Tocar para detener';
+  btn.classList.add('activa');
+}
+
+function manejadorBrujula(e) {
+  // alpha = rotación del dispositivo respecto al norte (0 = apunta al norte)
+  // En iOS: webkitCompassHeading es más confiable
+  let rumbo;
+  if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+    rumbo = e.webkitCompassHeading; // iOS: ya corregido al norte magnético
+  } else if (e.absolute && e.alpha !== null) {
+    rumbo = 360 - e.alpha; // Android con orientación absoluta
+  } else if (e.alpha !== null) {
+    rumbo = 360 - e.alpha;
+  } else {
+    return;
+  }
+
+  rumboActual = rumbo;
+
+  // Rotar la ROSA en sentido contrario al giro del teléfono
+  // Si el teléfono gira X grados, la rosa gira -X para que N siempre apunte al norte
+  const rosa = document.getElementById('brujulaRosa');
+  rosa.style.transform = `rotate(${-rumbo}deg)`;
+
+  // La flecha del viento se ajusta: viento relativo al norte real + compensación rumbo
+  if (datoViento) {
+    const rotacionViento = ((datoViento.direccion + 180) - rumbo + 360) % 360;
+    document.getElementById('flechaViento').style.transform = `rotate(${rotacionViento}deg)`;
+  }
+
+  document.getElementById('rumboTexto').textContent =
+    `Rumbo: ${Math.round(rumbo)}° ${gradosACardinal(rumbo)}`;
 }
 </script>
 
